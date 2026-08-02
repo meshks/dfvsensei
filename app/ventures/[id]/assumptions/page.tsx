@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/cn";
+import { runDeterministicQualityChecks, type QualityFlag } from "@/domain/assumptions/quality";
 
 type DfvCategory = "desirability" | "feasibility" | "viability";
 
@@ -39,6 +40,22 @@ export default function AssumptionsPage() {
   const [extracting, setExtracting] = useState(false);
   const [dfvGapReason, setDfvGapReason] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [aiFlags, setAiFlags] = useState<Record<string, QualityFlag[]>>({});
+  const [reviewing, setReviewing] = useState(false);
+
+  const domainFlagsByAssumption = useMemo(() => {
+    const checkable = assumptions.map((a) => ({
+      id: a.id,
+      statement: a.statement,
+      actor: a.actor,
+      observableBehaviour: a.observableBehaviour,
+    }));
+    const result: Record<string, QualityFlag[]> = {};
+    for (const assumption of checkable) {
+      result[assumption.id] = runDeterministicQualityChecks(assumption, checkable);
+    }
+    return result;
+  }, [assumptions]);
 
   function load() {
     fetch(`/api/ventures/${id}/assumptions`)
@@ -76,6 +93,35 @@ export default function AssumptionsPage() {
     setAssumptions((prev) => prev.filter((a) => a.id !== assumptionId));
   }
 
+  async function handleReviewQuality() {
+    setReviewing(true);
+    setError(null);
+    const response = await fetch(`/api/ventures/${id}/assumptions/review`, { method: "POST" });
+    if (!response.ok) {
+      setError("Something went wrong reviewing assumption quality.");
+      setReviewing(false);
+      return;
+    }
+    const data = (await response.json()) as {
+      reviews: { assumptionId: string; flags: QualityFlag[] }[];
+    };
+    const byAssumption: Record<string, QualityFlag[]> = {};
+    for (const review of data.reviews) {
+      byAssumption[review.assumptionId] = review.flags;
+    }
+    setAiFlags(byAssumption);
+    setReviewing(false);
+  }
+
+  async function handleAcceptRewrite(assumptionId: string, rewrite: string) {
+    await fetch(`/api/ventures/${id}/assumptions/${assumptionId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ statement: rewrite }),
+    });
+    load();
+  }
+
   async function handleScoreChange(
     assumptionId: string,
     field: "importanceScore" | "evidenceStrengthScore",
@@ -98,17 +144,29 @@ export default function AssumptionsPage() {
       </Link>
       <div className="mt-2 mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Assumptions</h1>
-        <button
-          type="button"
-          onClick={handleExtract}
-          disabled={extracting}
-          className={cn(
-            "rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white dark:bg-white dark:text-neutral-900",
-            "hover:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-200",
+        <div className="flex gap-2">
+          {assumptions.length > 0 && (
+            <button
+              type="button"
+              onClick={handleReviewQuality}
+              disabled={reviewing}
+              className="rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-700 dark:hover:bg-neutral-800"
+            >
+              {reviewing ? "Reviewing…" : "AI quality review"}
+            </button>
           )}
-        >
-          {extracting ? "Extracting…" : "Extract assumptions"}
-        </button>
+          <button
+            type="button"
+            onClick={handleExtract}
+            disabled={extracting}
+            className={cn(
+              "rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white dark:bg-white dark:text-neutral-900",
+              "hover:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-200",
+            )}
+          >
+            {extracting ? "Extracting…" : "Extract assumptions"}
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -158,6 +216,38 @@ export default function AssumptionsPage() {
               </div>
 
               <p className="mb-3">{assumption.statement}</p>
+
+              {(() => {
+                const flags = [
+                  ...(domainFlagsByAssumption[assumption.id] ?? []),
+                  ...(aiFlags[assumption.id] ?? []),
+                ];
+                if (flags.length === 0) return null;
+                return (
+                  <ul className="mb-3 space-y-2">
+                    {flags.map((flag, i) => (
+                      <li
+                        key={`${flag.type}-${i}`}
+                        className="rounded-md bg-amber-50 p-2 text-xs text-amber-900 dark:bg-amber-950 dark:text-amber-200"
+                      >
+                        <span className="font-medium">{flag.type.replace(/_/g, " ")}:</span>{" "}
+                        {flag.detail}
+                        {flag.suggestedRewrite && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleAcceptRewrite(assumption.id, flag.suggestedRewrite!)
+                            }
+                            className="ml-2 underline underline-offset-2"
+                          >
+                            Accept rewrite: &ldquo;{flag.suggestedRewrite}&rdquo;
+                          </button>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                );
+              })()}
 
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <label>
