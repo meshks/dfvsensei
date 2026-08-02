@@ -24,21 +24,36 @@ DFV Sensei is an evidence-based venture-testing web app: Idea → Assumption →
 6. **Every mutation to assumptions, map snapshots, Test Card thresholds, evidence, and decisions writes an `audit_events` row.** If you add a new mutation path to one of these entities, wire the audit write in the same PR.
 7. **AI keys are server-side only.** Never reference `ANTHROPIC_API_KEY` (or any provider key) from client components or expose it via a public env var.
 
-## Commands (once Phase 1 scaffold exists)
+## Commands
 
 ```
-pnpm dev            # local dev server
-pnpm lint           # eslint
-pnpm format         # prettier
-pnpm typecheck      # tsc --noEmit
-pnpm test           # vitest (unit + integration)
-pnpm test:e2e       # playwright
-pnpm build           # production build gate
-supabase start       # local Postgres/Auth/Storage
-supabase db reset    # apply migrations + seed.sql
+pnpm dev              # local dev server
+pnpm lint             # eslint
+pnpm format           # prettier --write
+pnpm format:check     # prettier --check (CI)
+pnpm typecheck        # tsc --noEmit
+pnpm test             # vitest unit + integration projects
+pnpm test:unit        # vitest unit project only
+pnpm test:integration # vitest integration project only (needs a live DATABASE_URL)
+pnpm test:e2e         # playwright
+pnpm build             # production build gate
+pnpm db:migrate         # applies supabase/migrations/*.sql to DATABASE_URL, in order, tracked in `_migrations`
+pnpm db:seed             # seeds experiment_library + the window-cleaning fixture venture
 ```
 
 Run format → lint → typecheck → unit → integration → e2e in that order before reporting any phase complete, and report pass/fail/incomplete explicitly — do not claim a feature works without a corresponding passing test (`TEST_STRATEGY.md` §7).
+
+### Local Postgres
+
+Real Supabase CLI/Docker weren't available in the sandbox this was built in, so
+Phase 1 uses the system-installed PostgreSQL 16 directly (`service postgresql
+start`) against two databases: `dfv_sensei_dev` and `dfv_sensei_test`. `pnpm
+db:migrate`/`db:seed`/`test:integration` all just need a working `DATABASE_URL`
+(see `.env.example`) -- swap in a real Supabase local stack (`supabase start`)
+or hosted instance later without changing any application code, since
+`infrastructure/supabase/db.ts` is the only place that constructs the
+connection. Integration tests assume migrations are already applied; run
+`pnpm db:migrate` first rather than expecting the test suite to self-migrate.
 
 ## Working conventions
 
@@ -49,4 +64,8 @@ Run format → lint → typecheck → unit → integration → e2e in that order
 
 ## Current status
 
-Phase 0 (Discovery and Design) complete. Phase 1 (local vertical slice) not yet started — pending plan approval per `IMPLEMENTATION_PLAN.md`.
+Phase 0 (Discovery and Design) complete. Phase 1 (local vertical slice) in progress:
+scaffold, domain layer (scoring/quality/guardrails), AI provider abstraction, and the
+Postgres schema are done and tested. UI screens and the AI-operation-backed
+application/use-case layer are not built yet -- see `IMPLEMENTATION_PLAN.md` §1
+for the remaining steps.
