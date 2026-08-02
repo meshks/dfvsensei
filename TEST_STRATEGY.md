@@ -31,6 +31,8 @@ Unit (fast, most numerous) → Integration (DB/AI/auth boundaries) → E2E (crit
 
 ## 4. End-to-end tests (Playwright)
 
+**Known Phase 1 gap:** e2e specs currently run against the shared local dev database with no per-run reset (unlike integration tests, which truncate in `beforeEach` against a dedicated test database). `tests/e2e/create-venture.spec.ts` was written to tolerate this (locators scoped to the created item, not page-wide text), but this is a workaround, not the target state -- Phase 2 should give e2e runs their own seeded-then-reset database, the same way integration tests already work, once a CI environment is wired up.
+
 Single critical-path spec covering brief §13 steps 1–13, using the window-cleaning fixture (`IMPLEMENTATION_PLAN.md` §1.5) as the seed idea:
 
 1. Create venture (Market-Led, since the fixture starts from a customer problem).

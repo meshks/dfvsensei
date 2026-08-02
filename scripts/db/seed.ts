@@ -479,6 +479,7 @@ const EXPERIMENT_LIBRARY: ExperimentLibrarySeed[] = [
   },
 ];
 
+const DEV_USER_ID = "00000000-0000-0000-0000-000000000001";
 const FIXTURE_USER_ID = "20000000-0000-0000-0000-000000000001";
 const FIXTURE_VENTURE_ID = "20000000-0000-0000-0000-000000000002";
 
@@ -493,6 +494,14 @@ async function main() {
 
   try {
     await client.query("begin");
+
+    // The Phase 1 "current user" stand-in for auth -- see lib/dev-user.ts.
+    await client.query(
+      `insert into users (id, email, display_name) values ($1, $2, $3)
+       on conflict (id) do nothing`,
+      [DEV_USER_ID, "dev@dfvsensei.local", "Dev User"],
+    );
+    console.log("Ensured the dev user exists.");
 
     await client.query("delete from experiment_library");
     for (const experiment of EXPERIMENT_LIBRARY) {

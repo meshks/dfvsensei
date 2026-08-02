@@ -18,10 +18,24 @@ export type Env = z.infer<typeof envSchema>;
 
 let cached: Env | undefined;
 
+/**
+ * A .env file setting a key to an empty string (e.g. `ANTHROPIC_API_KEY=` with
+ * nothing after it, as in .env.example) still puts that key in process.env as
+ * "" -- not undefined. Without this, an optional field's `.min(1)` check fails
+ * on "unset" values instead of treating them as genuinely unset.
+ */
+function emptyStringsToUndefined(env: NodeJS.ProcessEnv): Record<string, string | undefined> {
+  const result: Record<string, string | undefined> = {};
+  for (const [key, value] of Object.entries(env)) {
+    result[key] = value === "" ? undefined : value;
+  }
+  return result;
+}
+
 export function getEnv(): Env {
   if (cached) return cached;
 
-  const parsed = envSchema.safeParse(process.env);
+  const parsed = envSchema.safeParse(emptyStringsToUndefined(process.env));
   if (!parsed.success) {
     const issues = parsed.error.issues
       .map((issue) => `  - ${issue.path.join(".")}: ${issue.message}`)
