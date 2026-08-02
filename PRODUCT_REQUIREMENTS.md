@@ -86,7 +86,7 @@ Stages 1–11 plus a minimal Stage 12 dashboard and Stage 13 JSON export constit
 - **A1** — App will use Supabase (Postgres + Auth + Storage) as the default backend; swappable behind a repository layer (`ARCHITECTURE.md`).
 - **A2** — AI provider defaults to an Anthropic Claude model via a server-side provider abstraction; not hard-wired to a single model name in domain code.
 - **A3** — Phase 1 runs against a local/dev Postgres (Supabase CLI or Docker) with auth stubbed to a single seeded user, since multi-user auth is not required to prove the evidence loop.
-- **A4** — The experiment library ships with ~16 clearly labelled `DEMO` experiments spanning the generic Lean-Startup experiment taxonomy (see licensing note above), hand-written and original, until an administrator imports a licensed dataset via CSV/JSON.
+- **A4** — The experiment library ships with 19 clearly labelled `DEMO` experiments spanning the generic Lean-Startup experiment taxonomy (see licensing note above), hand-written and original, until an administrator imports a licensed dataset via CSV/JSON.
 - **A5** — Single aggregate "venture score" is explicitly rejected per the brief; dashboard shows DFV-scoped confidence with visible components instead.
 - **A6** — Currency/locale, language: English only, no i18n scaffolding in v1 beyond string externalisation hygiene.
 

@@ -21,7 +21,7 @@ Goal: acceptance criteria in `PRODUCT_REQUIREMENTS.md` §8, provable end-to-end 
 ### 1.3 Infrastructure
 - `infrastructure/supabase`: repository implementations for each entity used in Phase 1.
 - `infrastructure/ai`: `AnthropicProvider implements AiProvider`; prompt templates + Zod schemas for the 11 Phase-1-relevant operations in `AI_BEHAVIOUR_SPEC.md` (facilitator-feedback schema stubbed only).
-- Seed script: ~16 demo `experiment_library` records (status='demo'), original summaries against the generic *Testing Business Ideas*-style taxonomy (Customer Interview, Landing Page Test, Concierge Test, Wizard of Oz, Smoke Test, Pre-order, Letter of Intent, A/B Test, Crowdfunding, Prototype Test, and others), covering discovery-through-validation and all three DFV categories so the window-cleaning fixture has real, commitment-grade and light-discovery candidates to rank between.
+- Seed script: 19 demo `experiment_library` records (status='demo'), original summaries against the generic *Testing Business Ideas*-style taxonomy (Customer Interview, Landing Page Test, Concierge Test, Wizard of Oz, Smoke Test, Pre-order, Letter of Intent, A/B Test, Crowdfunding, Prototype Test, and others), covering discovery-through-validation and all three DFV categories so the window-cleaning fixture has real, commitment-grade and light-discovery candidates to rank between.
 
 ### 1.4 UI — build in this order (each step demoable)
 1. Venture dashboard (empty state) + create-venture wizard.
