@@ -9,6 +9,7 @@ import {
   assumptionExtractionOutputSchema,
   assumptionQualityReviewOutputSchema,
   dfvClassificationOutputSchema,
+  type ExperimentRecommendationOutput,
   evidenceQualityReviewOutputSchema,
   experimentRecommendationOutputSchema,
   facilitatorFeedbackOutputSchema,
@@ -99,6 +100,10 @@ const MOCK_FIXTURES: Record<AiOperationName, unknown> = {
     explanation:
       "[mock] This is a prioritisation aid based on importance and evidence strength, not a verdict.",
   },
+  // A real scored list is generated per-call from the candidates embedded in
+  // the prompt (see buildExperimentRecommendationFixture) -- an always-empty
+  // fixture made "Get recommendations" look broken with no candidates ever
+  // returned. This entry stays for FIXTURE_SCHEMAS/test round-tripping only.
   "experiment-recommendation": {
     recommendations: [],
   },
@@ -148,6 +153,84 @@ const FIXTURE_SCHEMAS: Record<AiOperationName, z.ZodType> = {
   "facilitator-feedback": facilitatorFeedbackOutputSchema,
 };
 
+const TIME_OR_COST_SCORE: Record<"short" | "medium" | "long" | "low" | "high", number> = {
+  short: 1,
+  low: 1,
+  medium: 0.6,
+  long: 0.3,
+  high: 0.3,
+};
+
+const EVIDENCE_STRENGTH_SCORE: Record<"light" | "medium" | "strong", number> = {
+  light: 0.4,
+  medium: 0.65,
+  strong: 0.9,
+};
+
+/**
+ * The real prompt (recommend-experiments.ts buildUserPrompt) embeds the full
+ * candidate list as plain text. Parsing it back out lets the mock return a
+ * schema-valid, scored recommendation for every real candidate instead of an
+ * empty list -- "Get recommendations" would otherwise always show nothing
+ * under AI_PROVIDER=mock, since recommend-experiments.ts filters its output
+ * down to candidateById matches. Deterministic scoring, not real reasoning:
+ * clearly labelled [mock] throughout, same convention as every other fixture.
+ */
+function buildExperimentRecommendationFixture(userPrompt: string): ExperimentRecommendationOutput {
+  const blocks = userPrompt
+    .split(/\n(?=- libraryId: )/)
+    .filter((b) => b.startsWith("- libraryId:"));
+
+  const recommendations = blocks.flatMap((block) => {
+    const libraryId = /libraryId: (\S+)/.exec(block)?.[1];
+    const name = /name: ([^\n]+)/.exec(block)?.[1]?.trim();
+    const evidenceStrength = /evidenceStrength: (light|medium|strong)/.exec(block)?.[1] as
+      "light" | "medium" | "strong" | undefined;
+    const setupTime = /setupTime: (short|medium|long)/.exec(block)?.[1] as
+      "short" | "medium" | "long" | undefined;
+    const runTime = /runTime: (short|medium|long)/.exec(block)?.[1] as
+      "short" | "medium" | "long" | undefined;
+    const relativeCost = /relativeCost: (low|medium|high)/.exec(block)?.[1] as
+      "low" | "medium" | "high" | undefined;
+
+    if (!libraryId || !name || !evidenceStrength || !setupTime || !runTime || !relativeCost) {
+      return [];
+    }
+
+    const evidenceScore = EVIDENCE_STRENGTH_SCORE[evidenceStrength];
+    const costAndSpeed =
+      (TIME_OR_COST_SCORE[setupTime] +
+        TIME_OR_COST_SCORE[runTime] +
+        TIME_OR_COST_SCORE[relativeCost]) /
+      3;
+    const scoreBreakdown = {
+      assumptionFit: evidenceScore,
+      evidenceStrengthRequired: evidenceScore,
+      costAndSpeed,
+      stageAppropriateness: 0.6,
+      accessEthicsPracticality: 0.6,
+    };
+    const score =
+      scoreBreakdown.assumptionFit * 0.4 +
+      scoreBreakdown.evidenceStrengthRequired * 0.25 +
+      scoreBreakdown.costAndSpeed * 0.15 +
+      scoreBreakdown.stageAppropriateness * 0.1 +
+      scoreBreakdown.accessEthicsPracticality * 0.1;
+
+    return [
+      {
+        libraryId,
+        score,
+        scoreBreakdown,
+        whatItCanProve: `[mock] What "${name}" can plausibly show, based on its ${evidenceStrength} evidence strength -- not real model reasoning (AI_PROVIDER=mock).`,
+        whatItCannotProve: `[mock] Does not by itself prove anything beyond what a ${evidenceStrength}-evidence experiment can show.`,
+      },
+    ];
+  });
+
+  return { recommendations };
+}
+
 export { FIXTURE_SCHEMAS as __mockFixtureSchemasForTests, MOCK_FIXTURES as __mockFixturesForTests };
 
 export interface MockAiProviderOptions {
@@ -182,6 +265,9 @@ export class MockAiProvider implements AiProvider {
         }
         if (this.latencyMs > 0) {
           await new Promise((resolve) => setTimeout(resolve, this.latencyMs));
+        }
+        if (args.operation === "experiment-recommendation") {
+          return JSON.stringify(buildExperimentRecommendationFixture(args.userPrompt));
         }
         return JSON.stringify(MOCK_FIXTURES[args.operation]);
       },
