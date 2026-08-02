@@ -1,4 +1,5 @@
 import pg from "pg";
+import { resolveSsl } from "../../infrastructure/supabase/resolve-ssl";
 
 const { Client } = pg;
 
@@ -489,7 +490,7 @@ async function main() {
     throw new Error("DATABASE_URL is required. Copy .env.example to .env.local and set it.");
   }
 
-  const client = new Client({ connectionString: databaseUrl });
+  const client = new Client({ connectionString: databaseUrl, ssl: resolveSsl(databaseUrl) });
   await client.connect();
 
   try {

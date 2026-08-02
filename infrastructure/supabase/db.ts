@@ -1,5 +1,6 @@
 import pg from "pg";
 import { getEnv } from "@/lib/env";
+import { resolveSsl } from "./resolve-ssl";
 
 const { Pool } = pg;
 
@@ -13,7 +14,8 @@ let pool: pg.Pool | undefined;
  */
 export function getPool(): pg.Pool {
   if (!pool) {
-    pool = new Pool({ connectionString: getEnv().DATABASE_URL });
+    const connectionString = getEnv().DATABASE_URL;
+    pool = new Pool({ connectionString, ssl: resolveSsl(connectionString) });
   }
   return pool;
 }

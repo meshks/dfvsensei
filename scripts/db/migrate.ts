@@ -1,6 +1,7 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import pg from "pg";
+import { resolveSsl } from "../../infrastructure/supabase/resolve-ssl";
 
 const { Client } = pg;
 
@@ -25,7 +26,7 @@ async function main() {
     return;
   }
 
-  const client = new Client({ connectionString: databaseUrl });
+  const client = new Client({ connectionString: databaseUrl, ssl: resolveSsl(databaseUrl) });
   await client.connect();
 
   try {
