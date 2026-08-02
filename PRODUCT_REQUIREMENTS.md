@@ -1,6 +1,6 @@
-# Product Requirements — ProofLoop (working title)
+# Product Requirements — DFV Sensei
 
-> **Naming note:** "ProofLoop" is a placeholder used throughout the planning docs so entities have a stable name. It is not final — awaiting the real name from the product owner. Do not confuse this product with, or model its content on, the commercial "Precoil" product referenced in this environment's `precoil-emt` skill (precoil.com/library). Precoil uses the same public-domain DVF / Extract-Map-Test vocabulary popularised by *Testing Business Ideas* (Bland & Osterwalder, Wiley 2019), which is fair to build on conceptually, but its specific experiment library text, scoring copy, and product structure are a competitor's proprietary content and must not be copied, scraped, or imitated.
+> **Naming note:** "DFV Sensei" is the confirmed product name (chosen by the product owner). Do not confuse this product with, or model its content on, the commercial "Precoil" product referenced in this environment's `precoil-emt` skill (precoil.com/library). Precoil uses the same public-domain DFV / Extract-Map-Test vocabulary popularised by *Testing Business Ideas* (Bland & Osterwalder, Wiley 2019), which is fair to build on conceptually, but its specific experiment library text, scoring copy, and product structure are a competitor's proprietary content and must not be copied, scraped, or imitated.
 >
 > **Experiment library source note (confirmed with product owner):** the library is "based on the business testing book" — meaning it uses the same well-known, generic experiment taxonomy that book popularised (Customer Interview, Landing Page Test, Concierge Test, Wizard of Oz, Smoke Test, Pre-order, Letter of Intent, A/B Test, Crowdfunding, Prototype Test, and similar Lean-Startup-standard names). Every procedure, summary, and rating in the shipped `demo` dataset is independently written for this project, not transcribed from *Testing Business Ideas*. The book's exact text, ratings iconography, and worksheet layout are Wiley/Osterwalder/Bland's copyrighted content and are never reproduced. If the product owner later secures reproduction rights to that exact material, it enters through the admin CSV/JSON import as licensed content — it does not become the app's default data.
 
@@ -10,15 +10,15 @@
 
 Core loop: **Idea → Hypothesis → Experiment → Evidence → Learning → Decision → Next Experiment**
 
-ProofLoop is an evidence and decision system, not an idea generator. Its job is to stop six specific confusions:
+DFV Sensei is an evidence and decision system, not an idea generator. Its job is to stop six specific confusions:
 
-| Confusion | What ProofLoop enforces instead |
+| Confusion | What DFV Sensei enforces instead |
 |---|---|
 | Opinion vs. evidence | Every evidence item is typed and provenance is recorded |
 | Activity vs. learning | Learning Cards are a required gate before a decision can be recorded |
 | Prototype completion vs. validation | Feasibility evidence is scored separately from build status |
 | Compliments vs. commitment | Willingness-to-pay assumptions require commitment-grade experiments (Section 4.3) |
-| Technical readiness vs. market readiness | DVF categories are scored and shown independently, never blended into one number without breakdown |
+| Technical readiness vs. market readiness | DFV categories are scored and shown independently, never blended into one number without breakdown |
 | AI recommendation vs. final judgement | Every AI output is a suggestion the user must accept, edit, or reject; nothing AI-generated silently becomes canonical |
 
 ## 2. Users and roles (MVP scope)
@@ -37,9 +37,9 @@ Both are first-class, chosen at venture creation and changeable later without da
 - **Market-Led**: starts from an unmet customer problem. Proposition under test: *this customer problem can be solved with this proposed solution.*
 - **IP-Led**: starts from existing technology/IP/prototype/research output. Proposition under test: *this existing technology can create value for this customer in this application.*
 
-The entry path changes emphasis (which assumption types are seeded first, which onboarding questions appear) but both converge on the same DVF assumption model.
+The entry path changes emphasis (which assumption types are seeded first, which onboarding questions appear) but both converge on the same DFV assumption model.
 
-## 4. Domain principles (DVF)
+## 4. Domain principles (DFV)
 
 ### 4.1 Desirability
 *Do customers want it enough to adopt, use, switch, or continue using it?* Segment, problem existence/frequency/intensity/consequence, alternatives, value proposition, adoption, channel, trust, retention.
@@ -50,7 +50,7 @@ The entry path changes emphasis (which assumption types are seeded first, which 
 ### 4.3 Viability
 *Can the business generate sufficient, sustainable economic value?* Willingness to pay, pricing, revenue model, purchase process, CAC, cost to serve, margin, repeat revenue, budget ownership, sales cycle.
 
-Every assumption has exactly one **primary** DVF category (for reporting/matrix placement) and zero or more **secondary tags** (for cross-cutting visibility). The system explains the primary classification rather than forcing false certainty — classification includes a confidence score and rationale.
+Every assumption has exactly one **primary** DFV category (for reporting/matrix placement) and zero or more **secondary tags** (for cross-cutting visibility). The system explains the primary classification rather than forcing false certainty — classification includes a confidence score and rationale.
 
 ## 5. Core user journey (13 stages)
 
@@ -87,7 +87,7 @@ Stages 1–11 plus a minimal Stage 12 dashboard and Stage 13 JSON export constit
 - **A2** — AI provider defaults to an Anthropic Claude model via a server-side provider abstraction; not hard-wired to a single model name in domain code.
 - **A3** — Phase 1 runs against a local/dev Postgres (Supabase CLI or Docker) with auth stubbed to a single seeded user, since multi-user auth is not required to prove the evidence loop.
 - **A4** — The experiment library ships with ~16 clearly labelled `DEMO` experiments spanning the generic Lean-Startup experiment taxonomy (see licensing note above), hand-written and original, until an administrator imports a licensed dataset via CSV/JSON.
-- **A5** — Single aggregate "venture score" is explicitly rejected per the brief; dashboard shows DVF-scoped confidence with visible components instead.
+- **A5** — Single aggregate "venture score" is explicitly rejected per the brief; dashboard shows DFV-scoped confidence with visible components instead.
 - **A6** — Currency/locale, language: English only, no i18n scaffolding in v1 beyond string externalisation hygiene.
 
 ## 8. Acceptance criteria — first vertical slice
@@ -96,7 +96,7 @@ A user can, end-to-end, without data loss and passing lint/typecheck/tests/build
 
 1. Create a venture (either entry path).
 2. Enter and edit an idea description (with the guided template).
-3. Generate DVF-structured assumptions via AI.
+3. Generate DFV-structured assumptions via AI.
 4. Edit/merge/split/delete assumptions; quality flags shown and actionable.
 5. Place assumptions on the importance×evidence 2×2 map (drag, keyboard, and numeric-score paths).
 6. Reload the venture and see the same map state.

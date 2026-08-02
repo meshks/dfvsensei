@@ -1,4 +1,4 @@
-# Domain Model — ProofLoop
+# Domain Model — DFV Sensei
 
 Postgres (Supabase). All tables: `id uuid pk default gen_random_uuid()`, `created_at timestamptz default now()`, `updated_at timestamptz` (trigger-maintained), `created_by uuid references users`. Soft delete (`deleted_at timestamptz null`) only on user-authored content that can be restored (ventures, assumptions, evidence_items); everything else hard-deletes or is versioned instead.
 
@@ -28,8 +28,8 @@ is_current boolean
 
 ### `assumptions`
 ```
-id, venture_id, statement, dvf_primary enum('desirability','feasibility','viability'),
-dvf_secondary text[] (subset of same enum),
+id, venture_id, statement, dfv_primary enum('desirability','feasibility','viability'),
+dfv_secondary text[] (subset of same enum),
 assumption_type enum('segment','problem','solution','channel','revenue','cost',
   'resource','activity','partner','data','regulation','adoption','other'),
 actor, observable_behaviour,
@@ -56,7 +56,7 @@ id, assumption_id, computed_at, importance_score, evidence_strength_score,
 risk_priority numeric generated (see §3), quality_flags jsonb,
 -- quality_flags shape: [{ "type": "vague_language"|"compound"|"non_testable"|
 --   "missing_actor"|"missing_behaviour"|"feature_as_assumption"|
---   "unfounded_claim"|"category_mismatch"|"duplicate"|"dvf_gap",
+--   "unfounded_claim"|"category_mismatch"|"duplicate"|"dfv_gap",
 --   "detail": string, "suggested_rewrite": string|null }]
 model_version, prompt_version
 ```
@@ -80,7 +80,7 @@ Reload restores exact state by loading the `is_current` snapshot; every save cre
 ```
 id, name, original_summary (independently written, never verbatim from a
   third-party source), experiment_family, discovery_or_validation enum,
-  applicable_dvf text[], applicable_assumption_types text[],
+  applicable_dfv text[], applicable_assumption_types text[],
   evidence_strength enum('light','medium','strong'),
   setup_time enum('short','medium','long'), run_time enum('short','medium','long'),
   relative_cost enum('low','medium','high'), required_access text,
@@ -205,7 +205,7 @@ Write policies additionally check `venture_members.role in ('owner','editor')`. 
 
 ## 5. Indexing notes
 
-- `assumptions(venture_id, status)`, `assumptions(venture_id, dvf_primary)` — list/filter screens.
+- `assumptions(venture_id, status)`, `assumptions(venture_id, dfv_primary)` — list/filter screens.
 - `assumption_scores(assumption_id, computed_at desc)` — latest score lookup.
 - `evidence_items(test_card_id, evidence_type)`.
 - `audit_events(venture_id, created_at desc)`.

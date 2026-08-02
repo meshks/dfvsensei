@@ -1,4 +1,4 @@
-# Test Strategy — ProofLoop
+# Test Strategy — DFV Sensei
 
 ## 1. Pyramid
 
@@ -6,7 +6,7 @@ Unit (fast, most numerous) → Integration (DB/AI/auth boundaries) → E2E (crit
 
 ## 2. Unit tests (Vitest)
 
-- **DVF classification rules** — `domain/assumptions`: given ambiguous statements, must not default to viability (regression test directly encoding the brief's "avoid automatically selecting viability" rule).
+- **DFV classification rules** — `domain/assumptions`: given ambiguous statements, must not default to viability (regression test directly encoding the brief's "avoid automatically selecting viability" rule).
 - **Risk-priority calculation** — `riskPriority()`/`evidenceGap()`: boundary cases (0, 10, midpoints), monotonicity (higher importance + lower evidence ⇒ higher priority).
 - **Evidence-gap calculation** — covered above.
 - **Recommendation scoring** — weighted sum correctness (40/25/15/10/10), and the three hard guardrail rules from `AI_BEHAVIOUR_SPEC.md` §3.7 as explicit fixtures:
@@ -57,7 +57,7 @@ Automated: `axe-core` via `@axe-core/playwright` against every screen in `USER_F
 Manual/scripted checks (documented, run before each phase sign-off, not fully automatable):
 - Keyboard-only completion of the 2×2 map placement (no mouse).
 - Focus order matches visual order on the create-venture wizard and Test Card editor (multi-step forms are the highest-risk focus-trap surface).
-- Colour contrast: DVF orange/green/blue against both light and dark backgrounds meet WCAG AA; red reserved for destructive/failure states only, never as the sole signal (paired with icon + text per `USER_FLOWS.md` §6).
+- Colour contrast: DFV orange/green/blue against both light and dark backgrounds meet WCAG AA; red reserved for destructive/failure states only, never as the sole signal (paired with icon + text per `USER_FLOWS.md` §6).
 - Screen-reader names: drag handles on the map announce role + current position; the numeric-input fallback is reachable and labelled.
 - Reduced motion: map suggestion animations and skeleton loaders respect `prefers-reduced-motion`.
 - Error announcements: form validation errors (e.g. missing threshold) are announced via `aria-live`, not just visually flagged.

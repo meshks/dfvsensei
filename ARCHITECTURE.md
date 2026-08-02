@@ -1,4 +1,4 @@
-# Architecture — ProofLoop
+# Architecture — DFV Sensei
 
 ## 1. Stack decision
 
@@ -26,7 +26,7 @@ app/                      # Next.js App Router routes (UI only — no business l
   admin/...
 components/                 # presentational + composed UI (shadcn-based)
 domain/                      # pure domain logic, framework-agnostic
-  assumptions/                 # quality-flag rules, DVF classification helpers
+  assumptions/                 # quality-flag rules, DFV classification helpers
   scoring/                      # risk_priority, evidence_gap, recommendation weighting
   experiments/                   # recommendation post-filter guardrails (AI_BEHAVIOUR_SPEC §3.7)
 application/                 # use-case orchestration (calls domain + infra, framework-agnostic)

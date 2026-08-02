@@ -1,4 +1,4 @@
-# User Flows — ProofLoop
+# User Flows — DFV Sensei
 
 ## 1. Screen inventory
 
@@ -52,7 +52,7 @@ Venture overview
   → Assumption-quality review
       - flags shown per assumption (vague / compound / non-testable / missing actor,
         missing behaviour / feature-as-assumption / unfounded claim / category mismatch /
-        duplicate / DVF gap)
+        duplicate / DFV gap)
       - user accepts flag+rewrite, edits manually, or dismisses flag with note
   → 2×2 risk map
       - axes fixed: Y = importance (low→high, bottom→top), X = evidence (strong→weak, left→right)
@@ -62,9 +62,9 @@ Venture overview
         importance/evidence inputs as an always-available non-drag alternative
       - AI auto-placement available as a one-click "suggest positions" action; suggested
         positions render with a distinct visual treatment until the user accepts them
-      - filter by DVF, colour-coded (Desirability=orange, Viability=green, Feasibility=blue)
+      - filter by DFV, colour-coded (Desirability=orange, Viability=green, Feasibility=blue)
   → "Get AI feedback" → feedback drawer (highest-risk assumptions, inconsistent placements,
-      category errors, DVF gaps, weak wording, strong-vs-weak evidence commentary) —
+      category errors, DFV gaps, weak wording, strong-vs-weak evidence commentary) —
       each point links back to the specific assumption card; accept/reject per suggestion
   → Save map snapshot (versioned; reload restores exact positions)
 ```
@@ -100,7 +100,7 @@ Assumption detail (any assumption, typically top-right quadrant)
 
 ```
 Venture overview → Dashboard tab
-  - DVF confidence (three separate bars/values, never blended into one score)
+  - DFV confidence (three separate bars/values, never blended into one score)
   - unresolved high-risk assumptions (top-right quadrant, sorted by risk_priority)
   - experiment backlog / active experiments
   - learning velocity (experiments completed / time)
@@ -120,4 +120,4 @@ Export preview
 - **Loading states**: skeleton loaders for AI operations with elapsed-time indicator past 3s; AI calls are never silently retried without user visibility.
 - **AI attribution**: any AI-generated field carries a persistent "AI suggested" badge until a human edits or explicitly accepts it; accepted-but-unedited content is marked "AI suggested · accepted", never silently converted to "user-authored".
 - **Uncertainty**: AI feedback panels always show a confidence indicator and never use bare imperative language ("do X"); phrasing is evidence-based ("this suggests…", "based on the assumptions above…").
-- **Accessibility**: every drag-and-drop interaction has a keyboard + form-field equivalent (2×2 map, experiment reordering); focus order follows visual order; colour is never the only signal (DVF categories also carry text labels/icons).
+- **Accessibility**: every drag-and-drop interaction has a keyboard + form-field equivalent (2×2 map, experiment reordering); focus order follows visual order; colour is never the only signal (DFV categories also carry text labels/icons).

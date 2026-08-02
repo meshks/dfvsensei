@@ -1,4 +1,4 @@
-# AI Behaviour Spec — ProofLoop
+# AI Behaviour Spec — DFV Sensei
 
 ## 1. Principles
 
@@ -36,22 +36,22 @@ On schema validation failure: retry once with the validation error appended to t
 
 ### 3.2 `assumption-extraction`
 - **Input**: idea summary + structured fields + entry path.
-- **Output**: array of atomic assumptions, each `{ statement, dvf_primary, dvf_secondary[], assumption_type, actor, observable_behaviour, rationale, source: 'ai_generated' }`.
-- **Guardrail**: one claim per assumption (schema rejects compound statements via a required `actor` + single `observable_behaviour` pair, checked by the review operation, not assumed correct at extraction time); must cover all three DVF categories unless the idea genuinely lacks basis for one (in which case return fewer with an explanatory `dvf_gap_reason`).
+- **Output**: array of atomic assumptions, each `{ statement, dfv_primary, dfv_secondary[], assumption_type, actor, observable_behaviour, rationale, source: 'ai_generated' }`.
+- **Guardrail**: one claim per assumption (schema rejects compound statements via a required `actor` + single `observable_behaviour` pair, checked by the review operation, not assumed correct at extraction time); must cover all three DFV categories unless the idea genuinely lacks basis for one (in which case return fewer with an explanatory `dfv_gap_reason`).
 
 ### 3.3 `assumption-quality-review`
 - **Input**: one or more assumption statements.
 - **Output**: `{ assumption_id, flags: [{ type, detail, suggested_rewrite? }] }[]` — flag types match `assumption_scores.quality_flags` in `DOMAIN_MODEL.md` §2.
 - **Guardrail**: `suggested_rewrite` is always a suggestion field, never applied without the user clicking "accept rewrite" (which creates an `assumption_versions` row).
 
-### 3.4 `dvf-classification`
+### 3.4 `dfv-classification`
 - **Input**: assumption statement.
-- **Output**: `{ dvf_primary, dvf_secondary[], confidence, rationale }`.
+- **Output**: `{ dfv_primary, dfv_secondary[], confidence, rationale }`.
 - **Guardrail**: must not default to viability when uncertain (brief explicitly bans over-selecting viability); ties are broken by returning the lower-confidence classification with rationale explaining the ambiguity, not a silent pick.
 
 ### 3.5 `map-feedback`
 - **Input**: current map snapshot (all assumption positions + scores).
-- **Output**: `{ highest_risk_assumption_ids[], inconsistent_placements: [{assumption_id, reason}], category_errors: [...], underrepresented_dvf: string[], weak_wording: [...], summary }`.
+- **Output**: `{ highest_risk_assumption_ids[], inconsistent_placements: [{assumption_id, reason}], category_errors: [...], underrepresented_dfv: string[], weak_wording: [...], summary }`.
 - **Guardrail**: must cite specific `assumption_id`s for every claim (no generic "consider testing more assumptions" filler); banned from praising without specificity; must not systematically prefer viability assumptions as "riskiest" — this is checked in eval fixtures (see `TEST_STRATEGY.md`).
 
 ### 3.6 `risk-priority-explanation`
@@ -59,7 +59,7 @@ On schema validation failure: retry once with the validation error appended to t
 - **Output**: `{ explanation }` — plain-language explanation of the `risk_priority` formula applied to this assumption; explicitly states it's a prioritisation aid, not a verdict.
 
 ### 3.7 `experiment-recommendation`
-- **Input**: assumption + venture stage + constraints (budget/time ceiling if provided) + candidate set from `experiment_library` (pre-filtered by `applicable_dvf`/`applicable_assumption_types` in application code — the AI ranks, it does not invent candidates).
+- **Input**: assumption + venture stage + constraints (budget/time ceiling if provided) + candidate set from `experiment_library` (pre-filtered by `applicable_dfv`/`applicable_assumption_types` in application code — the AI ranks, it does not invent candidates).
 - **Output**: top 5 `{ library_id, score, score_breakdown, what_it_can_prove, what_it_cannot_prove }` per the weights in `DOMAIN_MODEL.md` §3.
 - **Guardrail — hard-coded, not just prompted**: application-layer post-filter rejects recommendations that violate the brief's explicit rules before they ever reach the UI:
   - willingness-to-pay assumptions cannot rank a non-commitment experiment (interview-only) above a commitment-grade one (payment/deposit/pre-order/PO/paid-pilot) in the top result;
