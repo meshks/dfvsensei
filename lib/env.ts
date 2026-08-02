@@ -5,9 +5,12 @@ import { z } from "zod";
  * request handler. See ARCHITECTURE.md §5.
  */
 const envSchema = z.object({
-  NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1),
-  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
+  // Reserved for the Phase 2 Supabase-client integration (ARCHITECTURE.md §5) --
+  // no repository or route reads these yet, so they're optional rather than
+  // blocking deployment on a value nothing currently uses.
+  NEXT_PUBLIC_SUPABASE_URL: z.string().url().optional(),
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1).optional(),
+  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1).optional(),
   DATABASE_URL: z.string().min(1),
   AI_PROVIDER: z.enum(["anthropic", "mock"]).default("mock"),
   ANTHROPIC_API_KEY: z.string().min(1).optional(),

@@ -1,17 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { __resetEnvCacheForTests, getEnv } from "./env";
 
-const REQUIRED_KEYS = [
+const REQUIRED_KEYS = ["DATABASE_URL"] as const;
+
+const OPTIONAL_KEYS = [
   "NEXT_PUBLIC_SUPABASE_URL",
   "NEXT_PUBLIC_SUPABASE_ANON_KEY",
   "SUPABASE_SERVICE_ROLE_KEY",
-  "DATABASE_URL",
 ] as const;
 
 const VALID_BASE_ENV: Record<string, string> = {
-  NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:54321",
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: "anon-key",
-  SUPABASE_SERVICE_ROLE_KEY: "service-role-key",
   DATABASE_URL: "postgres://postgres:postgres@127.0.0.1:5432/dev",
 };
 
@@ -28,7 +26,13 @@ afterEach(() => {
 });
 
 function setEnv(overrides: Record<string, string | undefined>) {
-  for (const key of [...REQUIRED_KEYS, "AI_PROVIDER", "ANTHROPIC_API_KEY", "NODE_ENV"]) {
+  for (const key of [
+    ...REQUIRED_KEYS,
+    ...OPTIONAL_KEYS,
+    "AI_PROVIDER",
+    "ANTHROPIC_API_KEY",
+    "NODE_ENV",
+  ]) {
     delete process.env[key];
   }
   Object.assign(process.env, VALID_BASE_ENV, overrides);
@@ -45,6 +49,14 @@ describe("getEnv", () => {
   it("throws with a readable message when a required var is missing", () => {
     setEnv({ DATABASE_URL: undefined });
     expect(() => getEnv()).toThrow(/DATABASE_URL/);
+  });
+
+  it("does not require the Supabase-client fields -- nothing reads them yet (Phase 1 uses DATABASE_URL directly)", () => {
+    setEnv({});
+    expect(() => getEnv()).not.toThrow();
+    expect(getEnv().NEXT_PUBLIC_SUPABASE_URL).toBeUndefined();
+    expect(getEnv().NEXT_PUBLIC_SUPABASE_ANON_KEY).toBeUndefined();
+    expect(getEnv().SUPABASE_SERVICE_ROLE_KEY).toBeUndefined();
   });
 
   it("treats an empty-string ANTHROPIC_API_KEY as unset, not invalid", () => {
