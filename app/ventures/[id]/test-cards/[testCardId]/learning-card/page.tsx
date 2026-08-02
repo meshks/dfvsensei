@@ -153,7 +153,9 @@ export default function LearningCardPage() {
         />
 
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-medium">What happened</h2>
+          <h2 id="happened-label" className="text-sm font-medium">
+            What happened
+          </h2>
           <button
             type="button"
             onClick={handleSynthesize}
@@ -164,11 +166,12 @@ export default function LearningCardPage() {
           </button>
         </div>
         <Field
-          label=""
+          label="What happened"
           value={form.happened}
           onChange={(v) => setForm({ ...form, happened: v })}
           multiline
           hideLabel
+          labelledBy="happened-label"
         />
         <Field
           label="Metric result"
@@ -232,12 +235,14 @@ function Field({
   onChange,
   multiline,
   hideLabel,
+  labelledBy,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   multiline?: boolean;
   hideLabel?: boolean;
+  labelledBy?: string;
 }) {
   const id = `field-${label.toLowerCase().replace(/[^a-z]+/g, "-") || "happened"}`;
   return (
@@ -253,6 +258,7 @@ function Field({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           rows={3}
+          aria-labelledby={labelledBy}
           className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900"
         />
       ) : (
@@ -260,6 +266,7 @@ function Field({
           id={id}
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          aria-labelledby={labelledBy}
           className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900"
         />
       )}

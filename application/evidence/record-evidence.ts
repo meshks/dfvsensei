@@ -15,8 +15,18 @@ export const recordEvidenceRequestSchema = z.object({
     "other",
   ]),
   description: z.string().trim().min(1).max(2000),
-  metricValue: z.string().trim().max(200).optional(),
-  dateObserved: z.string().trim().max(50).optional(),
+  metricValue: z
+    .string()
+    .trim()
+    .max(200)
+    .optional()
+    .transform((v) => (v === "" ? undefined : v)),
+  dateObserved: z
+    .string()
+    .trim()
+    .max(50)
+    .optional()
+    .transform((v) => (v === "" ? undefined : v)),
   confidence: z.number().min(0).max(1).optional(),
 });
 export type RecordEvidenceRequest = z.infer<typeof recordEvidenceRequestSchema>;
