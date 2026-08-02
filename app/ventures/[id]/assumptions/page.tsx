@@ -284,13 +284,21 @@ export default function AssumptionsPage() {
                 </label>
               </div>
 
-              <button
-                type="button"
-                onClick={() => handleDelete(assumption.id)}
-                className="mt-3 text-xs text-red-600 hover:underline dark:text-red-400"
-              >
-                Delete
-              </button>
+              <div className="mt-3 flex items-center gap-4">
+                <Link
+                  href={`/ventures/${id}/assumptions/${assumption.id}`}
+                  className="text-xs font-medium underline underline-offset-4"
+                >
+                  Select &amp; get experiment recommendations
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => handleDelete(assumption.id)}
+                  className="text-xs text-red-600 hover:underline dark:text-red-400"
+                >
+                  Delete
+                </button>
+              </div>
             </li>
           ))}
         </ul>

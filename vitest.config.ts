@@ -24,6 +24,7 @@ export default defineConfig({
           include: [
             "tests/unit/**/*.test.{ts,tsx}",
             "domain/**/*.test.{ts,tsx}",
+            "application/**/*.test.{ts,tsx}",
             "infrastructure/**/*.test.{ts,tsx}",
             "lib/**/*.test.{ts,tsx}",
           ],

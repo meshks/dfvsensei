@@ -143,7 +143,11 @@ export const experimentRecommendationItemSchema = z.object({
   whatItCannotProve: z.string().min(1),
 });
 export const experimentRecommendationOutputSchema = z.object({
-  recommendations: z.array(experimentRecommendationItemSchema).max(5),
+  // Scores every candidate passed in, not just the top 5: the application-layer
+  // guardrails (AI_BEHAVIOUR_SPEC.md §3.7) need the full scored set to find a
+  // valid alternative even when the AI's own top pick violates a hard rule --
+  // slicing to the top 5 happens after guardrails run, not before.
+  recommendations: z.array(experimentRecommendationItemSchema),
 });
 export type ExperimentRecommendationOutput = z.infer<typeof experimentRecommendationOutputSchema>;
 
