@@ -45,7 +45,9 @@ export default async function VenturesPage() {
         <ul className="divide-y divide-neutral-200 dark:divide-neutral-800">
           {ventures.map((venture) => (
             <li key={venture.id} className="py-4">
-              <p className="font-medium">{venture.name}</p>
+              <Link href={`/ventures/${venture.id}`} className="block hover:underline">
+                <p className="font-medium">{venture.name}</p>
+              </Link>
               <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
                 {venture.shortDescription || "No description yet."}
               </p>
