@@ -1,6 +1,8 @@
 # Product Requirements — ProofLoop (working title)
 
-> **Naming note:** "ProofLoop" is a placeholder used throughout the planning docs so entities have a stable name. It is not final — see the open questions in the Phase 0 response. Do not confuse this product with, or model its content on, the commercial "Precoil" product referenced in this environment's `precoil-emt` skill (precoil.com/library). Precoil uses the same public-domain DVF / Extract-Map-Test vocabulary popularised by *Testing Business Ideas* (Bland & Osterwalder, Wiley 2019), which is fair to build on conceptually, but its specific experiment library text, scoring copy, and product structure are a competitor's proprietary content and must not be copied, scraped, or imitated.
+> **Naming note:** "ProofLoop" is a placeholder used throughout the planning docs so entities have a stable name. It is not final — awaiting the real name from the product owner. Do not confuse this product with, or model its content on, the commercial "Precoil" product referenced in this environment's `precoil-emt` skill (precoil.com/library). Precoil uses the same public-domain DVF / Extract-Map-Test vocabulary popularised by *Testing Business Ideas* (Bland & Osterwalder, Wiley 2019), which is fair to build on conceptually, but its specific experiment library text, scoring copy, and product structure are a competitor's proprietary content and must not be copied, scraped, or imitated.
+>
+> **Experiment library source note (confirmed with product owner):** the library is "based on the business testing book" — meaning it uses the same well-known, generic experiment taxonomy that book popularised (Customer Interview, Landing Page Test, Concierge Test, Wizard of Oz, Smoke Test, Pre-order, Letter of Intent, A/B Test, Crowdfunding, Prototype Test, and similar Lean-Startup-standard names). Every procedure, summary, and rating in the shipped `demo` dataset is independently written for this project, not transcribed from *Testing Business Ideas*. The book's exact text, ratings iconography, and worksheet layout are Wiley/Osterwalder/Bland's copyrighted content and are never reproduced. If the product owner later secures reproduction rights to that exact material, it enters through the admin CSV/JSON import as licensed content — it does not become the app's default data.
 
 ## 1. Vision
 
@@ -84,7 +86,7 @@ Stages 1–11 plus a minimal Stage 12 dashboard and Stage 13 JSON export constit
 - **A1** — App will use Supabase (Postgres + Auth + Storage) as the default backend; swappable behind a repository layer (`ARCHITECTURE.md`).
 - **A2** — AI provider defaults to an Anthropic Claude model via a server-side provider abstraction; not hard-wired to a single model name in domain code.
 - **A3** — Phase 1 runs against a local/dev Postgres (Supabase CLI or Docker) with auth stubbed to a single seeded user, since multi-user auth is not required to prove the evidence loop.
-- **A4** — The experiment library ships with ≤10 clearly labelled `DEMO` experiments, hand-written and original, until an administrator imports a licensed dataset via CSV/JSON.
+- **A4** — The experiment library ships with ~16 clearly labelled `DEMO` experiments spanning the generic Lean-Startup experiment taxonomy (see licensing note above), hand-written and original, until an administrator imports a licensed dataset via CSV/JSON.
 - **A5** — Single aggregate "venture score" is explicitly rejected per the brief; dashboard shows DVF-scoped confidence with visible components instead.
 - **A6** — Currency/locale, language: English only, no i18n scaffolding in v1 beyond string externalisation hygiene.
 

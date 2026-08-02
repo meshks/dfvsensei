@@ -98,6 +98,6 @@ On schema validation failure: retry once with the validation error appended to t
 - **Logging**: `ai_runs` logs model, prompt_version, operation, status, latency_ms, token estimate — never the raw API key, never full PII payloads (input_hash instead of raw input where the input contains free-text user data beyond what's already durably stored elsewhere).
 - **Auditability**: every AI suggestion that gets accepted produces both an `ai_runs` row (what was suggested) and an `audit_events` row (that it was accepted, by whom, when) — the two are joinable.
 
-## 5. Open item
+## 5. Resolved item
 
-The "authoritative 44-experiment dataset" referenced in brief §8 needs a confirmed, licensed source before `experiment_library.status` can move any record from `demo` to `active`. This is a blocking question in the Phase 0 response, not an AI-behaviour design gap — the schema and import pipeline are ready either way.
+The "authoritative 44-experiment dataset" referenced in brief §8 is confirmed to be conceptually anchored on *Testing Business Ideas* (Bland & Osterwalder) per the product owner, but no reproduction license for that book's exact text exists yet. `experiment_library.status` therefore stays `demo` for all seed data — original write-ups against the book's generic, widely-used experiment taxonomy (see `PRODUCT_REQUIREMENTS.md` licensing note) — until an administrator imports a licensed dataset via CSV/JSON, at which point those records move to `active`. Schema and import pipeline are unaffected either way.
