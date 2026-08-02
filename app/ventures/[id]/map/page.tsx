@@ -24,6 +24,15 @@ interface MapItem {
   evidenceStrength: number;
 }
 
+interface MapFeedback {
+  highestRiskAssumptionIds: string[];
+  inconsistentPlacements: { assumptionId: string; reason: string }[];
+  categoryErrors: { assumptionId: string; reason: string }[];
+  underrepresentedDfv: DfvCategory[];
+  weakWording: { assumptionId: string; reason: string }[];
+  summary: string;
+}
+
 const CONTAINER_SIZE = 560;
 
 const DFV_DOT: Record<DfvCategory, string> = {
@@ -137,6 +146,8 @@ export default function RiskMapPage() {
   const [visibleDfv, setVisibleDfv] = useState<Set<DfvCategory>>(
     new Set(["desirability", "feasibility", "viability"]),
   );
+  const [feedback, setFeedback] = useState<MapFeedback | null>(null);
+  const [loadingFeedback, setLoadingFeedback] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -199,6 +210,16 @@ export default function RiskMapPage() {
     setDirty(false);
   }
 
+  async function handleGetFeedback() {
+    setLoadingFeedback(true);
+    const response = await fetch(`/api/ventures/${id}/map/feedback`, { method: "POST" });
+    if (response.ok) {
+      const data = (await response.json()) as { feedback: MapFeedback };
+      setFeedback(data.feedback);
+    }
+    setLoadingFeedback(false);
+  }
+
   function toggleDfv(category: DfvCategory) {
     setVisibleDfv((prev) => {
       const next = new Set(prev);
@@ -218,17 +239,29 @@ export default function RiskMapPage() {
       </Link>
       <div className="mt-2 mb-2 flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Risk map</h1>
-        <button
-          type="button"
-          onClick={handleSave}
-          disabled={!dirty || saving}
-          className={cn(
-            "rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white dark:bg-white dark:text-neutral-900",
-            "hover:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-200",
+        <div className="flex gap-2">
+          {items.length > 0 && (
+            <button
+              type="button"
+              onClick={handleGetFeedback}
+              disabled={loadingFeedback}
+              className="rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-700 dark:hover:bg-neutral-800"
+            >
+              {loadingFeedback ? "Reviewing…" : "Get AI feedback"}
+            </button>
           )}
-        >
-          {saving ? "Saving…" : dirty ? "Save map" : "Saved"}
-        </button>
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={!dirty || saving}
+            className={cn(
+              "rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white dark:bg-white dark:text-neutral-900",
+              "hover:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-200",
+            )}
+          >
+            {saving ? "Saving…" : dirty ? "Save map" : "Saved"}
+          </button>
+        </div>
       </div>
       <p className="mb-6 text-sm text-neutral-600 dark:text-neutral-400">
         Vertical axis: importance (low at bottom, high at top). Horizontal axis: evidence (strong on
@@ -341,8 +374,72 @@ export default function RiskMapPage() {
               ))}
             </tbody>
           </table>
+
+          {feedback && (
+            <section className="mt-8 rounded-lg border border-neutral-200 p-5 dark:border-neutral-800">
+              <h2 className="mb-3 text-sm font-medium tracking-wide text-neutral-500 uppercase">
+                AI map feedback
+              </h2>
+              <p className="mb-4">{feedback.summary}</p>
+
+              {feedback.highestRiskAssumptionIds.length > 0 && (
+                <FeedbackList
+                  title="Highest risk"
+                  entries={feedback.highestRiskAssumptionIds.map((assumptionId) => ({
+                    assumptionId,
+                    reason: undefined,
+                  }))}
+                  items={items}
+                />
+              )}
+              <FeedbackList
+                title="Inconsistent placements"
+                entries={feedback.inconsistentPlacements}
+                items={items}
+              />
+              <FeedbackList
+                title="Category errors"
+                entries={feedback.categoryErrors}
+                items={items}
+              />
+              <FeedbackList title="Weak wording" entries={feedback.weakWording} items={items} />
+              {feedback.underrepresentedDfv.length > 0 && (
+                <p className="mt-3 text-sm text-neutral-600 dark:text-neutral-400">
+                  Underrepresented: {feedback.underrepresentedDfv.join(", ")}
+                </p>
+              )}
+            </section>
+          )}
         </>
       )}
     </main>
+  );
+}
+
+function FeedbackList({
+  title,
+  entries,
+  items,
+}: {
+  title: string;
+  entries: { assumptionId: string; reason?: string }[];
+  items: MapItem[];
+}) {
+  if (entries.length === 0) return null;
+  return (
+    <div className="mt-3">
+      <h3 className="text-xs font-medium text-neutral-500 uppercase">{title}</h3>
+      <ul className="mt-1 space-y-1 text-sm">
+        {entries.map((entry, i) => {
+          const item = items.find((it) => it.id === entry.assumptionId);
+          return (
+            <li key={`${entry.assumptionId}-${i}`}>
+              {item?.statement ?? entry.assumptionId}
+              {entry.reason && <span className="text-neutral-500"> — {entry.reason}</span>}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 }
